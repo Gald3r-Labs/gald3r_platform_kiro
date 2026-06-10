@@ -1,47 +1,62 @@
-# Adding Gald3r to an Existing Project (Kiro)
+﻿# Adding Gald3r to an Existing Project
 
-Add gald3r to a project that **already exists**, for use with **Kiro**.
+These instructions are for developers who want to add gald3r to a project
+that **already exists**.
 
-For a brand-new project, see [instructions_new_project.md](./instructions_new_project.md).
+For starting a **brand-new project**, see [instructions_new_project.md](./instructions_new_project.md).
 
 ---
 
-## Step 1 - Get the `kiro/` payload
+## Step 1 - Pick Your AI Coding Tool
 
+See the tool/folder table in [instructions_new_project.md](./instructions_new_project.md#step-1--pick-your-ai-coding-tool).
+
+---
+
+## Step 2 - Download Just Your Platform Folder
+
+You only need one folder - not the whole repo.
+
+**Option A - GitHub Download (no git required):**
+1. Browse to https://github.com/wrm3/gald3r/tree/main/<your-tool>/
+2. Click **Code â†’ Download ZIP** (downloads the full repo)
+3. Unzip and find <your-tool>/ inside
+
+**Option B - Sparse checkout (advanced):**
 ```bash
-git clone --depth 1 https://github.com/wrm3/gald3r_platform_kiro.git
+git clone --no-checkout --depth=1 https://github.com/wrm3/gald3r.git gald3r-temp
+cd gald3r-temp
+git sparse-checkout init --cone
+git sparse-checkout set <your-tool>
+git checkout
+cp -r <your-tool>/ /path/to/your/existing/project/
+cd .. && rm -rf gald3r-temp
 ```
 
 ---
 
-## Step 2 - Copy the contents into your project root
+## Step 3 - Copy Into Your Project Root
 
-**bash / macOS / Linux:**
-```bash
-cp -r gald3r_platform_kiro/kiro/. /path/to/your/existing/project/
-```
+Copy the **contents** of <your-tool>/ into the root of your existing project.
 
-**Windows PowerShell:**
-```powershell
-Copy-Item -Recurse -Force .\gald3r_platform_kiro\kiro\* C:\path\to\your\project\
-```
-
-> **Additive, not destructive.** gald3r drops in its config + `.gald3r/` state and does not
-> modify your source. Don't overwrite same-named files unless you mean to. Your project keeps
-> its own LICENSE and docs.
+> **Important:** Do not overwrite files that already exist with the same name unless
+> you intend to. Gald3r config files (.cursor/rules/, .claude/skills/, etc.) are
+> additive - they extend your setup, they do not replace your code.
 
 ---
 
-## Step 3 - Open in Kiro
+## Step 4 - Open in Your IDE
 
-Reload the project in Kiro. gald3r auto-loads from its config.
-
----
-
-## Step 4 - Verify
-
-Type `@g-status`.
+Reload your AI coding tool. gald3r auto-loads from the config files.
 
 ---
 
-*Full docs: [README.md](./README.md) | [CHANGELOG.md](./CHANGELOG.md) | [all 34 tools](https://github.com/wrm3/gald3r)*
+## Step 5 - Verify
+
+`
+@g-status
+`
+
+---
+
+*Full documentation: [README.md](./README.md) | [CHANGELOG.md](./CHANGELOG.md)*

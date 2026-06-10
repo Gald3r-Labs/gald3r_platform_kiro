@@ -2,102 +2,223 @@
   <img src="logo/Gald3r_Logo_Big.jpg" alt="Gald3r" width="400" />
 </p>
 
-<h1 align="center">Gald3r for Kiro</h1>
+<h1 align="center">gald3r — AI Agent Framework for Your Project</h1>
 
 <p align="center">
-  The <strong>Kiro edition</strong> of Gald3r -- file-based memory, task management, and
-  agent orchestration that runs <strong>inside Kiro</strong>. Part of the Gald3r framework
-  for 34 AI coding tools.
+  File-based memory, task management, and agent orchestration that installs in minutes —
+  now backed by a bundled <strong>file-first engine</strong> (a <code>gald3r</code> CLI + MCP server,
+  zero LLM calls). Works in <strong>Cursor</strong> and <strong>Claude Code</strong> (Tier 1), plus
+  <strong>34 AI coding platforms</strong> — no server, no database, no Docker.
 </p>
 
 <p align="center">
-  <a href="https://www.gald3r.ai">www.gald3r.ai</a> |
-  <a href="https://github.com/wrm3/gald3r">All 34 tools</a> |
+  <a href="https://github.com/wrm3/gald3r/releases/tag/v2.0.1"><img src="https://img.shields.io/badge/version-2.0.1-blue" alt="version 2.0.1" /></a>
   <a href="CHANGELOG.md">Changelog</a> |
-  <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="CONTRIBUTING.md">Contributing</a> |
+  <a href="gald3r_supported_platforms.html">All 34 platforms</a>
 </p>
 
 ---
 
-## What is Gald3r?
+## What is gald3r?
 
-Gald3r is a framework that runs **inside your AI coding tool** -- not alongside it. Drop the
-template into your project root and your AI assistant gains:
+gald3r is a template you drop into any project to give your AI coding assistant a persistent brain.
 
-- **Persistent memory** across sessions (tasks, bugs, plans, constraints)
-- **13 specialized agents**, **110 skills**, **179 commands** (`@g-status`, `@g-go`, `@g-medic`)
-- **27 hooks** on IDE events, **14 rules** that keep agents disciplined
+Once installed, your AI gains:
 
-Everything is plain markdown in your repo. No server, no database, no Docker required.
+- **Persistent memory** across sessions — tasks, bugs, plans, constraints survive every restart
+- **110 skills** for common dev workflows (code review, QA, task management, planning, and more)
+- **177 commands** invoked directly in chat (`@g-status`, `@g-go`, `@g-task-new`, `@g-bug-report`)
+- **37 hooks** that fire on IDE events (session start, file save, commit)
+- **12 rules** that keep the agent disciplined every session
+- **Works in both Cursor and Claude Code** over one shared `.gald3r/` brain — plan in one, code in the other
+- **A bundled file-first engine** (Mode-A, new in 2.0) — every system (tasks, bugs, vault, releases, …) is driven by a deterministic Python core via the `gald3r` CLI or an MCP server, with zero LLM calls. `gald3r doctor` keeps the install healthy. One prerequisite: [`uv`](https://docs.astral.sh/uv/).
 
----
+Everything is plain markdown files in your repo. No accounts, no API keys beyond what you already have.
 
-## What's in this repo
-
-This is the **Kiro distribution** of Gald3r. The [`kiro/`](./kiro/) folder is a
-complete, ready-to-deploy gald3r setup tuned for Kiro -- drop its contents into your
-project and your assistant gains persistent memory, agents, skills, commands, and hooks.
-
-> **Using a different tool?** Gald3r supports 34 AI coding tools. Find yours at the main repo:
-> **[github.com/wrm3/gald3r](https://github.com/wrm3/gald3r)**.
+<!-- PENDING_RELEASE_START -->
+<!-- Pending release highlights (user-facing). Filled as features ship; cleared at publish. -->
+<!-- PENDING_RELEASE_END -->
 
 ---
 
-## Install
+## Quick Install
 
-**New project** -> [instructions_new_project.md](./instructions_new_project.md)
-**Existing project** -> [instructions_existing_project.md](./instructions_existing_project.md)
-
-**TL;DR -- copy the payload into your project root:**
+### Option 1 — Copy the template (recommended)
 
 ```bash
-git clone https://github.com/wrm3/gald3r_platform_kiro.git
-cp -r gald3r_platform_kiro/kiro/. /path/to/your/project/
+git clone https://github.com/wrm3/gald3r.git
+
+# Default: installs Cursor + Claude Code + shared brain
+cp -r gald3r/project_template/. /path/to/your/project/
 ```
 
-Then open the project in Kiro and type `@g-status` to confirm gald3r loaded.
+Then open your project in Cursor or Claude Code and run `@g-setup` / `/g-setup`.
 
-> The `kiro/` payload is **additive** -- it drops in gald3r's config + `.gald3r/` state and
-> does not touch your source. Your project keeps **its own** LICENSE and docs; the license in
-> *this* repo covers the gald3r framework itself.
+### Option 2 — Installer script (supports all 34 platforms)
+
+```powershell
+# Default: Cursor + Claude Code (same as copying project_template/)
+.\setup_gald3r_project.ps1 -TargetPath "C:\MyProject"
+
+# Install for a specific platform only
+.\setup_gald3r_project.ps1 -TargetPath "C:\MyProject" -Platform windsurf
+.\setup_gald3r_project.ps1 -TargetPath "C:\MyProject" -Platform cline
+.\setup_gald3r_project.ps1 -TargetPath "C:\MyProject" -Platform cursor    # Cursor only (no .claude/)
+```
 
 ---
 
-## What's Inside
+## What Gets Installed
 
-| Component | Count | Reference |
+**Default install** (Cursor + Claude Code):
+
+```
+your-project/
+├── .cursor/          ← Cursor config (rules, skills, commands, hooks, agents)
+├── .claude/          ← Claude Code config (same skill set, markdown format)
+├── .gald3r/          ← Shared project memory (tasks, bugs, plans, constraints)
+├── .gald3r_sys/      ← gald3r system files (skills engine, platform specs)
+├── AGENTS.md         ← Universal agent instructions (read by both IDEs)
+├── CLAUDE.md         ← Claude Code entry point
+└── WORKFLOW.md       ← Project workflow definition
+```
+
+**Platform-specific install** (e.g. `-Platform windsurf`): same shared brain, plus the platform's config folder (`.windsurf/rules/` etc.). Cursor and Claude config are skipped.
+
+---
+
+## The engine (CLI + MCP)
+
+New in 2.0: a bundled, file-first Python engine drives every system deterministically — **no LLM,
+no network, no Docker**. It lives in `.gald3r_sys/engine/`. The only prerequisite is
+[`uv`](https://docs.astral.sh/uv/); the first run provisions it automatically.
+
+### Command line
+
+```bash
+# from your project root — the first run builds the engine (a few seconds), then it's instant
+uv run --project .gald3r_sys/engine gald3r doctor          # health check  (add --fail-below 80 for CI)
+```
+
+For brevity, alias the prefix — `alias gald3r='uv run --project .gald3r_sys/engine gald3r'` — then:
+
+```bash
+gald3r task new   --title "Wire up auth" --priority high
+gald3r bug new    --title "Login 500 on empty cart" --severity high
+gald3r goal add   --text "Ship the MVP by Friday"
+gald3r vault ingest --title "JWT notes" --type article --source https://example.com/jwt
+gald3r inbox                                               # absorb staged task/bug drafts into live state
+gald3r prompt get role.code_reviewer                       # load a reasoning brief
+gald3r --json task list                                    # machine-readable output
+```
+
+(`python -m gald3r …` works too, if you'd rather not alias.)
+
+### As an MCP server
+
+Expose the same operations as ~20 MCP tools to any MCP-capable agent. Add to your client's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "gald3r": {
+      "command": "uv",
+      "args": ["run", "--project", ".gald3r_sys/engine", "gald3r", "mcp"]
+    }
+  }
+}
+```
+
+Your agent then calls `gald3r_task_new`, `gald3r_bug_list`, `gald3r_prompt_get`, … directly.
+
+### No engine? Still works.
+
+The engine is **additive**. The `.gald3r/` state is plain markdown, and every slimmed skill keeps a
+`SKILL.full.md` fallback — so a files-only install (no `uv` / Python) runs unchanged.
+
+---
+
+## Platform Support
+
+| Platform | Tier | Notes |
 |---|---|---|
-| Agents | 13 | [wiki / Agents](https://github.com/wrm3/gald3r/wiki/Agents) |
-| Commands | 179 | [wiki / Commands](https://github.com/wrm3/gald3r/wiki/Commands) |
-| Skills | 110 | [wiki / Skills](https://github.com/wrm3/gald3r/wiki/Skills) |
-| Rules | 14 | [wiki / Rules](https://github.com/wrm3/gald3r/wiki/Rules) |
-| Hooks | 27 | [wiki / Hooks](https://github.com/wrm3/gald3r/wiki/Hooks) |
-| Task system | -- | File-based `.gald3r/` for tasks, bugs, plans, constraints |
+| **Cursor** | ✅ Tier 1 | Rules (`.mdc`), skills, commands, hooks, agents |
+| **Claude Code** | ✅ Tier 1 | Rules (`.md`), skills, commands, hooks, agents |
+| **Windsurf, Cline, Roo, Aider** | ⚠️ Tier 2 | Rules + brain + AGENTS.md |
+| **Copilot, Codex, Augment, Gemini, Qwen, Continue** | ⚠️ Tier 2 | Rules + brain + AGENTS.md |
+| **20+ more** | 🔜 Tier 3 | Brain + AGENTS.md (rules where supported) |
 
-Complete, always-current catalogs live on the **[Gald3r Wiki](https://github.com/wrm3/gald3r/wiki)**.
-New here? Start with the **[Quickstart](https://github.com/wrm3/gald3r/wiki/Quickstart)**.
+Use `-Platform <name>` with the installer, or copy `platforms/<name>/` manually.
+See [gald3r_supported_platforms.html](gald3r_supported_platforms.html) for the full list.
 
----
-
-## The .gald3r/ Folder
-
-Everything gald3r remembers lives in one `.gald3r/` folder in your repo -- plain markdown and
-YAML, fully diffable, fully yours: tasks, bugs, plans, constraints, subsystems, features,
-ideas, learned facts, release notes, and audit logs.
+> **Cursor + Claude Code users get the full experience.** Other platforms receive the shared
+> `.gald3r/` brain and `AGENTS.md` instructions, with rules where the platform supports them.
 
 ---
 
-## Releases
+## How It Works
 
-See [releases/](./releases/) and [CHANGELOG.md](./CHANGELOG.md). Latest: **v1.9.0** --
-[releases/RELEASE_v1.9.0.md](./releases/RELEASE_v1.9.0.md).
+```
+Your project root
+├── AGENTS.md  ─────────────────────────────────────────────────────────┐
+├── .cursor/ (rules + skills + commands)   ← Cursor reads these         │
+├── .claude/ (rules + skills + commands)   ← Claude Code reads these     │
+│                                                                         │
+└── .gald3r/ ────────────────────────────────────────────────────────────┘
+    TASKS.md    ← shared task list, visible to both IDEs
+    BUGS.md     ← shared bug tracker
+    PLAN.md     ← shared strategy & milestones
+    CONSTRAINTS.md  ← rules the agent must never break
+```
+
+Every command you run in Cursor or Claude Code reads and writes these same files. Switch between tools anytime — context is never lost.
+
+---
+
+## Key Commands
+
+| Command | What it does |
+|---|---|
+| `@g-setup` / `/g-setup` | Initialize gald3r in a new project |
+| `@g-status` / `/g-status` | Show project health: tasks, bugs, open items |
+| `@g-go` / `/g-go` | Start an autonomous work session on the next task |
+| `@g-task-new` | Create a new task with spec |
+| `@g-bug-report` | File and triage a bug |
+| `@g-medic` | Run self-diagnostics on the gald3r installation |
+| `@g-plan` | Update and review the project plan |
+
+Full command catalog: [gald3r Wiki — Commands](https://github.com/wrm3/gald3r/wiki/Commands)
+
+---
+
+## Project Structure After Install
+
+```
+.gald3r/
+├── TASKS.md          ← master task index
+├── BUGS.md           ← bug index
+├── PLAN.md           ← milestones and strategy
+├── PROJECT.md        ← vision, mission, goals
+├── CONSTRAINTS.md    ← things the AI must never do
+├── SUBSYSTEMS.md     ← component registry
+├── tasks/            ← individual task files (one per task)
+├── bugs/             ← individual bug files
+└── features/         ← PRD files
+```
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Issues and PRs welcome.
 
 ---
 
-*Built with gald3r. Runs on gald3r.*
+## License
+
+[Fair Source License 1.1 (FSL-1.1-Apache)](LICENSE) — see [NOTICE](NOTICE) for third-party attributions.
+
+---
+
+*Powered by gald3r v2.0.1 · [Changelog](CHANGELOG.md) · [Roadmap](ROADMAP.md)*

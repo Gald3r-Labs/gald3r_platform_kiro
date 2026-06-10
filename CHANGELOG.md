@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to gald3r are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -8,16 +8,136 @@ gald3r uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+_Pending release notes accumulate here as tasks and bugs are completed. At publish time this
+section is renamed to `[X.Y.Z] - YYYY-MM-DD` and a fresh `[Unreleased]` block is opened._
+
+### Added
+
+### Changed
+
+### Fixed
+
+---
+
+## [2.0.1] - 2026-06-10
+
+Patch release — copyright transfer, release pipeline org fix, and workspace engine bug fix.
+
+### Changed
+- **Copyright transferred to Gald3r Labs LLC** — all repository LICENSE files updated from
+  `Warren R. Martel III` to `Gald3r Labs LLC` following company formation.
+- **`push_repos.ps1` default org updated** — `GitHubOrg` default changed from `wrm3` to
+  `Gald3r-Labs` to reflect the completed GitHub organization transfer.
+- **Platform repos now get GitHub Releases by default** — previously required `-GitHubReleaseAll`
+  flag; now all platform repos receive a tagged GitHub Release on every `push_repos.ps1` run.
+  Use new `-SkipPlatformRelease` flag to opt out.
+
+### Fixed
+- **BUG-128**: `workspace.py status()` always returned `role: standalone` due to misspelled
+  dict key `pcac_relationship` (should be `wpac_relationship`). WPAC topology was completely
+  invisible — every project appeared standalone regardless of configured parent/child
+  relationships. (`WORKSPACE_COORDINATION`)
+
+---
+
+## [2.0.0] - 2026-06-04
+
+The **gald3r engine** release. gald3r gains a bundled, file-first Python core that backs every
+system deterministically — while staying 100% markdown-on-disk. Existing installs keep working;
+the engine is additive, and every slimmed component ships a no-engine fallback.
+
+### Added
+- **Bundled gald3r engine** (`.gald3r_sys/engine/`) — a pure, file-first state backend for every
+  system: tasks, bugs, features, goals, prds, ideas, vocab, constraints, subsystems, vault,
+  release, workspace, and inbox. **Mode-A**: deterministic, no LLM, no network, no Docker. One
+  prerequisite — [`uv`](https://docs.astral.sh/uv/).
+- **`gald3r` CLI** (and `python -m gald3r`) — drive every system from the shell: `gald3r task new`,
+  `gald3r bug new`, `gald3r goal add`, `gald3r vault ingest`, `gald3r release new`,
+  `gald3r workspace …`, `gald3r prompt get …`.
+- **MCP server** (`gald3r mcp`) — ~20 Model Context Protocol tools exposing the same operations to
+  any MCP-capable agent.
+- **`gald3r doctor`** — read-only health check (structure, per-system index integrity, skill
+  frontmatter, `.ps1` encoding) with an overall functionality score and a `--fail-below` CI gate.
+- **Engine-absorbed operations** — five maintenance scripts reimplemented as pure engine verbs,
+  each keeping its original `.ps1` as a no-engine (L0) fallback: `gald3r inbox` · `gald3r doctor` ·
+  `gald3r platform status` · `gald3r tier show|set` · `gald3r sync --check|--apply` (alias
+  `gald3r parity`).
+- **Judgment / prompt layer** — 15 reasoning assets (Norse persona, role briefs, review rubrics,
+  marketing voice) served by the engine (`gald3r prompt get role.code_reviewer`), so a brief is
+  authored once and shared across platforms.
+
+### Changed
+- **Thinned component shims** — judgment skills and agents are slimmed to load their brief from the
+  engine's prompt assets. Skills keep a full `SKILL.full.md` fallback; agents reference the shipped
+  asset directly (no `.full.md` sidecar — it would register as a duplicate component).
+- **Task status vocabulary** — `task_file.v1.schema.yaml` realigned to mirror the engine's enforced
+  vocabulary (`pending → in-progress → awaiting-verification → completed …`). The YAML previously
+  listed a never-implemented pipeline as "current" and the real vocabulary as "legacy."
+
+### Fixed
+- **Windows PowerShell 5.1 parse crash** — 1,055 shipped `.ps1` files were UTF-8 without a BOM, so
+  `powershell.exe` mis-read multi-byte characters and failed to parse (including the installer
+  itself). All BOM-protected (installer ASCII-cleaned); the build generators now emit safe `.ps1`
+  and `gald3r doctor` flags any regression.
+- **Duplicate component names** — removed the per-agent `*.full.md` sidecars and the deprecated
+  `g-skl-medkit` (named `g-skl-medic`, colliding with the real skill). 106 skills + 13 agents now
+  audit clean (no duplicate `name:`, no dangling shim references).
+- **`doctor` / `bug sync` index mis-parse** — the id-scan matched the `## Next Bug ID:` counter line
+  (and any title mentioning it), producing false phantom/orphan rows and a non-converging
+  `bug sync`. Anchored to the counter heading.
+- **Malformed component frontmatter** — added missing `name`/`description` to 5 skills and agents.
+
+### Engineering
+- 97 engine unit tests (pytest). The engine is the new source of truth; `.gald3r_sys/schemas/`
+  mirrors it.
+
+---
+
+## [1.11.0] - 2026-06-04
+
+### Added
+- **`platforms/` folder**: all 34 platform thin adapters now live directly in `gald3r`.
+  No need to clone `<template_adv>` for Windsurf, Cline, Copilot, etc.
+- **`-Platform <name>` installer arg**: `setup_gald3r_project.ps1` now accepts any of 34
+  platforms. Default (no arg) = Cursor + Claude Code (unchanged). `-Platform windsurf` etc.
+  copies the shared brain (without .cursor/.claude) + the platform's thin config overlay.
+
+### Fixed
+- **Personality rule extension**: renamed `gald3r_personality.md` →
+  `gald3r_personality.mdc` in `project_template/.cursor/rules/`. Cursor only loads
+  `.mdc` files from the rules folder; the Norse personality was silently not loading.
+- **License reference in README**: corrected from `[MIT]` to `[Fair Source License 1.1
+  (FSL-1.1-Apache)]`. The actual LICENSE file was always FSL — only the README link was wrong.
+- **README**: updated version badge, installer docs, and platform table.
+
+### Architecture
+- **Realignment with gald3r ADV**: both repos now share the same `project_template/`
+  structure and `platforms/` thin-adapter model. `gald3r` is the primary install for all
+  34 platforms. `<template_adv>` is the reference archive for the explicit
+  shared-base + platform-overlay pattern (useful for tooling and multi-platform automation).
+
+## [1.11.0] - 2026-06-03
+
+### Changed
+- **Restructured install model**: deliverable is now `project_template/` — copy its contents to
+  your project root. Cursor + Claude Code are Tier 1; other platforms via `AGENTS.md` + `.gald3r/`.
+- **Simplified installer**: `setup_gald3r_project.ps1` rewritten from 44KB → ~110 lines. Single
+  purpose: copy `project_template/` to target, preserving existing `.gald3r/` user data.
+- **Stripped maintainer-only rules**: `g-rl-25` (session-start), `g-rl-33` (enforcement-catchall),
+  and `g-rl-36` (workspace-guard) removed from the shipped template — these are framework-build
+  tools, not end-user config. Shipped set: 11 lightweight rules + `gald3r_personality`.
+- **Updated README**: reflects actual structure and accurate component counts (110 skills,
+  177 commands, 37 hooks, 12 rules).
+
 ### Fixed
 - **BUG-099 safety fix**: All platform scaffold `gald3r_worktree.ps1` scripts and `development.yaml` files defaulted `TargetBranch`/`default_branch` to `dev` instead of `main`. This caused new projects created from any platform template to target a long-lived `dev` branch for worktree merges — a data-loss trap. Flipped 78 files (44 worktree scripts + 34 development.yaml) to `main`. Affects all 34+ platform scaffolds.
-
 ---
 
 ## [1.7.0] - 2026-05-28 (Workspace Distribution + Swarm Fix + 34-Platform Sweep)
 
 ### Changed
 
-- **Public-face restructure (T1522)**: The 23 ready-to-deploy platform templates moved from `platforms/<name>/` to `<name>/` directly at repo root. The standalone `platforms/README.md` matrix was removed (the platform comparison matrix lives in the main `README.md` per T1515). Removed internal/build artifacts that polluted the public view: `.cursor/`, `.claude/`, `.agent/`, `.codex/`, `.opencode/`, `.copilot/`, `.gald3r/`, `gald3r_template/`, `docs/`, `scripts/`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `GUARDRAILS.md`, `.claudeignore`, `.cursorignore`, `opencode.json`. Added `instructions_new_project.md` + `instructions_existing_project.md` covering the two audiences. The hero `README.md` was rewritten as a discovery-first document (no internal-tool references).
+- **Public-face restructure (T1522)**: The 23 ready-to-deploy platform templates moved from `platforms/<name>/` to `<name>/` directly at repo root. The standalone `platforms/README.md` matrix was removed (the platform comparison matrix lives in the main `README.md` per T1515). Removed internal/build artifacts that polluted the public view: `.cursor/`, `.claude/`, `.agent/`, `.codex/`, `.opencode/`, `.copilot/`, `.gald3r/`, `project_template/`, `docs/`, `scripts/`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `GUARDRAILS.md`, `.claudeignore`, `.cursorignore`, `opencode.json`. Added `instructions_new_project.md` + `instructions_existing_project.md` covering the two audiences. The hero `README.md` was rewritten as a discovery-first document (no internal-tool references).
 - **Per-platform README templates fixed (T1522 iter 2)**: Original 23 platform READMEs (`cursor/`, `claude/`, etc.) updated for the new flat layout -- install instruction says `Copy the contents of <name>/` (not `platforms/<name>/`); cross-links use `../README.md` and `../CHANGELOG.md` (not `../../`); removed the stale `Platform comparison matrix` link (matrix now lives in main `README.md`). The 11 newer platform READMEs (T1523/T1524/T1525 -- `amp/`, `astrbot/`, `codebuddy/`, `continue/`, `deepcode/`, `hermes/`, `kilo-code/`, `kimi/`, `qoder/`, `trae/`, `void/`) were authored with the correct flat-layout patterns from the start and were not touched in this commit.
 
 ### Added
@@ -256,4 +376,4 @@ gald3r uses [Semantic Versioning](https://semver.org/).
 
 ---
 
-*gald3r is built with gald3r. The development history of this framework lives in the gald3r_dev source repository.*
+*gald3r is built with gald3r. The development history of this framework lives in the <gald3r_source> source repository.*
